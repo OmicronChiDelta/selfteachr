@@ -45,3 +45,26 @@ v = vic_elec%>%mutate(CalYear = year(Date))
 #Scatter
 ggplot(v, aes(Temperature, Demand)) + geom_point(aes(color='red', alpha=0.001)) + xlab('Temperature/Celsius') + ylab('Electricity Demand') + ggtitle('Correlation between temperature and electricity demand')
 
+
+#What's the mean OPENING price per day in each calendar month for google stock?
+goog_stock = gafa_stock%>%
+  filter(Symbol=='GOOG')%>%
+  index_by(mon_group = yearmonth(Date))%>%
+  summarise(mean_op = mean(Open))
+
+#365-point MA applied to daily data to extract the trend cycle
+goog_ma = gafa_stock%>%
+  filter(Symbol=='GOOG')%>%
+  mutate('ma' = slide_dbl(Open, mean, .size=365, .align='centre'))
+
+#Show raw daily Open plus trend-cycle estimate
+ggplot(goog_ma, aes(Date, Open)) +
+  geom_point(color='blue') + 
+  autolayer(goog_ma, ma, color='red', size=2) +
+  xlab('Date (daily resolution)') +
+  ylab('Opening price') +
+  ggtitle('Extracting the dominant trend in Google stock')
+  
+
+
+  
